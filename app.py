@@ -1,14 +1,11 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func, distinct, UniqueConstraint
 from datetime import datetime, timedelta
-import pymysql
 import random
 
-pymysql.install_as_MySQLdb()
-
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/ambalearn'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -47,55 +44,6 @@ class DailyActiveUser(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     __table_args__ = (UniqueConstraint('user_id', 'date', name='_user_date_uc'),)
-
-
-def populate_data():
-    """Populates the database with dummy data."""
-    # --- Create Organizations and Courses ---
-    org_names = ['Org A', 'Org B', 'Org C', 'Org D', 'Org E']
-    course_names = ['Intro to AI', 'Advanced Machine Learning', 'Data Science 101', 'Python for Beginners', 'Natural Language Processing']
-    
-    for name in org_names:
-        if not Organization.query.filter_by(name=name).first():
-            db.session.add(Organization(name=name))
-            
-    for name in course_names:
-        if not Course.query.filter_by(name=name).first():
-            db.session.add(Course(name=name))
-    db.session.commit()
-
-    # --- Create Users ---
-    orgs = Organization.query.all()
-    users_to_create = []
-    for i in range(100):
-        created_date = datetime.utcnow() - timedelta(days=random.randint(0, 29))
-        last_seen_delta = timedelta(days=random.randint(0, (datetime.utcnow() - created_date).days))
-        last_seen_date = created_date + last_seen_delta
-        users_to_create.append(User(username=f'user{i}', created_at=created_date, last_seen=last_seen_date, organization_id=random.choice(orgs).id))
-
-    db.session.bulk_save_objects(users_to_create, return_defaults=True)
-    db.session.commit()
-
-    # --- Create Prompts and Daily Active Users ---
-    prompts_to_create = []
-    daily_active_users_to_add = set()
-    users = User.query.all()
-    for user in users:
-        for _ in range(random.randint(5, 50)):
-            if (datetime.utcnow() - user.created_at).days > 0:
-                prompt_date_delta = timedelta(days=random.randint(0, (datetime.utcnow() - user.created_at).days))
-                prompt_date = user.created_at + prompt_date_delta
-                prompts_to_create.append(Prompt(user_id=user.id, prompt_text=f'This is a sample prompt by {user.username}', created_at=prompt_date))
-                # Add to set for daily active users
-                daily_active_users_to_add.add((user.id, prompt_date.date()))
-
-    db.session.bulk_save_objects(prompts_to_create)
-    
-    # Create DailyActiveUser records
-    for user_id, date in daily_active_users_to_add:
-        db.session.add(DailyActiveUser(user_id=user_id, date=date))
-        
-    db.session.commit()
 
 
 # --- Routes ---
@@ -139,6 +87,91 @@ def overview():
                            new_user_counts=new_user_counts,
                            active_user_counts=active_user_counts)
 
+
+# --- Models Route ---
+@app.route('/models')
+def models():
+    return render_template('models.html')
+
+# --- Organization Routes ---
+@app.route('/organizations')
+def organizations():
+    all_orgs = Organization.query.all()
+    return render_template('organizations.html', organizations=all_orgs)
+
+@app.route('/add_organization', methods=['POST'])
+def add_organization():
+    org_name = request.form['organization_name']
+    if org_name:
+        new_org = Organization(name=org_name)
+        db.session.add(new_org)
+        db.session.commit()
+    return redirect(url_for('organizations'))
+
+@app.route('/edit_organization/<int:org_id>', methods=['GET', 'POST'])
+def edit_organization(org_id):
+    org = Organization.query.get_or_404(org_id)
+    if request.method == 'POST':
+        org.name = request.form['organization_name']
+        db.session.commit()
+        return redirect(url_for('organizations'))
+    return render_template('edit_organization.html', org=org)
+
+@app.route('/delete_organization/<int:org_id>')
+def delete_organization(org_id):
+    org = Organization.query.get_or_404(org_id)
+    db.session.delete(org)
+    db.session.commit()
+    return redirect(url_for('organizations'))
+
+# --- User Routes ---
+@app.route('/users')
+def users():
+    all_users = User.query.all()
+    all_orgs = Organization.query.all()
+    return render_template('users.html', users=all_users, organizations=all_orgs)
+
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    username = request.form['username']
+    org_id = request.form.get('organization_id')
+    if username:
+        new_user = User(username=username, organization_id=org_id if org_id else None)
+        db.session.add(new_user)
+        db.session.commit()
+    return redirect(url_for('users'))
+
+@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+    all_orgs = Organization.query.all()
+    if request.method == 'POST':
+        user.username = request.form['username']
+        user.organization_id = request.form.get('organization_id')
+        db.session.commit()
+        return redirect(url_for('users'))
+    return render_template('edit_user.html', user=user, organizations=all_orgs)
+
+@app.route('/delete_user/<int:user_id>')
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for('users'))
+
+
+@app.route('/feedback')
+def feedback():
+    """Renders the feedback page with placeholder data."""
+    # Placeholder data
+    feedback_data = [
+        {'user': 'user1', 'comment': 'This course was great!', 'course_name': 'Intro to AI', 'sentiment': 'Good'},
+        {'user': 'user2', 'comment': 'I did not like this course.', 'course_name': 'Advanced Machine Learning', 'sentiment': 'Bad'},
+        {'user': 'user3', 'comment': 'The instructor was very clear.', 'course_name': 'Data Science 101', 'sentiment': 'Good'},
+        {'user': 'user4', 'comment': 'The course content was outdated.', 'course_name': 'Python for Beginners', 'sentiment': 'Bad'},
+    ]
+    return render_template('feedback.html', feedback_data=feedback_data)
+
 if __name__ == '__main__':
     with app.app_context():
         # Since the user said they dropped the tables, we will always recreate and seed.
@@ -146,7 +179,5 @@ if __name__ == '__main__':
         print("Dropping all tables and recreating them...")
         db.drop_all()
         db.create_all()
-        print("Populating database with fresh dummy data...")
-        populate_data()
-        print("Database populated.")
+        print("Database is ready.")
     app.run(debug=True)
