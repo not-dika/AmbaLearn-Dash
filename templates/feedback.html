@@ -1,41 +1,85 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}AmbaLearn Dashboard - Feedback{% endblock %}
+{% block title %}Feedback - AmbaLearn Dashboard{% endblock %}
 
 {% block content %}
-    <h1 class="h2 mb-4">Feedback</h1>
+    <div class="page-header">
+        <h1>User Feedback</h1>
+        <p>Monitor and analyze feedback from learners</p>
+    </div>
 
-    <!-- Feedback Table -->
+    <div class="card-deck" style="margin-bottom: 32px;">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-emoji-smile-fill"></i>
+            </div>
+            <h5>Positive Feedback</h5>
+            <p style="color: var(--color-success);">{{ feedback_data | selectattr('sentiment', 'equalto', 'Good') | list | length }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, rgba(248, 113, 113, 0.15) 0%, rgba(251, 191, 36, 0.15) 100%);">
+                <i class="bi bi-emoji-frown-fill" style="color: var(--color-error);"></i>
+            </div>
+            <h5>Negative Feedback</h5>
+            <p style="color: var(--color-error);">{{ feedback_data | selectattr('sentiment', 'equalto', 'Bad') | list | length }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-chat-text-fill"></i>
+            </div>
+            <h5>Total Responses</h5>
+            <p>{{ feedback_data | length }}</p>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">User Feedback</h5>
-            <table class="table table-hover">
+            <h5 class="card-title"><i class="bi bi-chat-left-text-fill"></i> Recent Feedback</h5>
+            <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">User</th>
+                        <th scope="col">Course</th>
                         <th scope="col">Comment</th>
-                        <th scope="col">Course Name</th>
                         <th scope="col">Sentiment</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for row in feedback_data %}
+                    {% for feedback in feedback_data %}
                     <tr>
-                        <td>{{ row.user }}</td>
-                        <td>{{ row.comment }}</td>
-                        <td>{{ row.course_name }}</td>
                         <td>
-                            {% if row.sentiment == 'Good' %}
-                                <span class="badge bg-success">Good</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 36px; height: 36px; background: var(--gradient-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                                    {{ feedback.user[0].upper() }}
+                                </div>
+                                <span>{{ feedback.user }}</span>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-secondary">{{ feedback.course_name }}</span></td>
+                        <td>{{ feedback.comment }}</td>
+                        <td>
+                            {% if feedback.sentiment == 'Good' %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-emoji-smile-fill"></i> {{ feedback.sentiment }}
+                            </span>
                             {% else %}
-                                <span class="badge bg-danger">Bad</span>
+                            <span class="badge bg-danger">
+                                <i class="bi bi-emoji-frown-fill"></i> {{ feedback.sentiment }}
+                            </span>
                             {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
+                    {% if not feedback_data %}
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding: 48px; color: var(--color-text-secondary);">
+                            <i class="bi bi-chat-left-text" style="font-size: 48px; opacity: 0.5;"></i>
+                            <p style="margin-top: 16px;">No feedback received yet.</p>
+                        </td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
 {% endblock %}
-

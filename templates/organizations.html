@@ -3,16 +3,21 @@
 {% block title %}AmbaLearn Dashboard - Organizations{% endblock %}
 
 {% block content %}
-    <h1 class="h2 mb-4">Organizations</h1>
+    <div class="page-header">
+        <h1>Organizations</h1>
+        <p>Manage partner organizations and their access</p>
+    </div>
 
     <!-- Add Organization Form -->
     <div class="card mb-4">
         <div class="card-body">
-            <h5 class="card-title">Add New Organization</h5>
+            <h5 class="card-title"><i class="bi bi-building-add"></i> Add New Organization</h5>
             <form action="/add_organization" method="post">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" name="organization_name" placeholder="Organization Name" required>
-                    <button class="btn btn-primary" type="submit">Add</button>
+                    <input type="text" class="form-control" name="organization_name" placeholder="Enter organization name" required>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-plus-lg"></i> Add
+                    </button>
                 </div>
             </form>
         </div>
@@ -21,12 +26,13 @@
     <!-- Organizations Table -->
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">All Organizations</h5>
-            <table class="table table-hover">
+            <h5 class="card-title"><i class="bi bi-building"></i> All Organizations</h5>
+            <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Name</th>
+                        <th scope="col">Members</th>
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
@@ -34,16 +40,37 @@
                     {% for org in organizations %}
                     <tr>
                         <th scope="row">{{ org.id }}</th>
-                        <td>{{ org.name }}</td>
                         <td>
-                            <a href="/edit_organization/{{ org.id }}" class="btn btn-sm btn-outline-warning">Edit</a>
-                            <a href="/delete_organization/{{ org.id }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(45, 212, 191, 0.15) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-building" style="color: var(--color-primary-light); font-size: 18px;"></i>
+                                </div>
+                                <strong>{{ org.name }}</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ org.users | length }} members</span>
+                        </td>
+                        <td>
+                            <a href="/edit_organization/{{ org.id }}" class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="/delete_organization/{{ org.id }}" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
+                    {% if not organizations %}
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding: 48px; color: var(--color-text-secondary);">
+                            <i class="bi bi-building-x" style="font-size: 48px; opacity: 0.5;"></i>
+                            <p style="margin-top: 16px;">No organizations found. Add your first organization!</p>
+                        </td>
+                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
 {% endblock %}
-

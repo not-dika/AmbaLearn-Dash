@@ -3,35 +3,66 @@
 {% block title %}Overview - AmbaLearn Dashboard{% endblock %}
 
 {% block content %}
-    <h1 class="h2 mb-4">Overview</h1>
+    <div class="page-header">
+        <h1>Dashboard Overview</h1>
+        <p>Welcome back! Here's what's happening with your learning platform.</p>
+    </div>
 
     <div class="card-deck">
         <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
             <h5>Total Users</h5>
             <p>{{ total_users_count }}</p>
+            <div class="stat-change positive">
+                <i class="bi bi-arrow-up"></i>
+                <span>Active learners</span>
+            </div>
         </div>
         <div class="stat-card">
-            <h5>Total Organizations</h5>
+            <div class="stat-icon">
+                <i class="bi bi-building"></i>
+            </div>
+            <h5>Organizations</h5>
             <p>{{ total_organizations }}</p>
+            <div class="stat-change positive">
+                <i class="bi bi-check-circle"></i>
+                <span>Active partners</span>
+            </div>
         </div>
         <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-journal-bookmark-fill"></i>
+            </div>
             <h5>Total Courses</h5>
             <p>{{ total_courses }}</p>
+            <div class="stat-change positive">
+                <i class="bi bi-book"></i>
+                <span>Available courses</span>
+            </div>
         </div>
         <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-chat-dots-fill"></i>
+            </div>
             <h5>Total Prompts</h5>
             <p>{{ total_prompts_count }}</p>
+            <div class="stat-change positive">
+                <i class="bi bi-graph-up"></i>
+                <span>AI interactions</span>
+            </div>
         </div>
     </div>
     
     <div class="dashboard-grid">
         <div class="chart-container" id="prompts-chart-container">
-            <h4>Prompts per Day</h4>
+            <h4><i class="bi bi-graph-up"></i> Prompts per Day</h4>
             <canvas id="promptsChart"></canvas>
         </div>
         
         <div class="status-container">
-            <h4>System Status</h4>
+            <h4><i class="bi bi-activity"></i> System Status</h4>
             <div class="status-item">
                 <span>Web App</span>
                 <div class="status-indicator"></div>
@@ -50,25 +81,53 @@
             </div>
         </div>
 
-        <div class="chart-container" id="new-users-chart-container">
-            <h4>New Users per Day</h4>
-            <canvas id="newUsersChart"></canvas>
-        </div>
+        <div class="charts-row">
+            <div class="chart-container" id="new-users-chart-container">
+                <h4><i class="bi bi-person-plus-fill"></i> New Users per Day</h4>
+                <canvas id="newUsersChart"></canvas>
+            </div>
 
-        <div class="chart-container" id="active-users-chart-container">
-            <h4>Active Users per Day</h4>
-            <canvas id="activeUsersChart"></canvas>
+            <div class="chart-container" id="active-users-chart-container">
+                <h4><i class="bi bi-people"></i> Active Users per Day</h4>
+                <canvas id="activeUsersChart"></canvas>
+            </div>
         </div>
     </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    const chartLabels = {{ chart_labels | tojson }};
-    const gridColor = 'rgba(176, 176, 176, 0.1)';
-    const textColor = '#b0b0b0';
+    const chartLabels = JSON.parse('{{ chart_labels | tojson | safe }}');
+    const gridColor = 'rgba(148, 163, 184, 0.1)';
+    const textColor = '#94A3B8';
 
-    // Prompts Chart
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { 
+                beginAtZero: true, 
+                ticks: { color: textColor, font: { family: 'Inter' } }, 
+                grid: { color: gridColor } 
+            },
+            x: { 
+                ticks: { color: textColor, font: { family: 'Inter' } }, 
+                grid: { color: gridColor } 
+            }
+        },
+        plugins: { 
+            legend: { 
+                labels: { 
+                    color: textColor,
+                    font: { family: 'Inter', weight: 500 },
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                } 
+            } 
+        }
+    };
+
+    // Prompts Chart - Blue Theme
     const promptsCtx = document.getElementById('promptsChart').getContext('2d');
     new Chart(promptsCtx, {
         type: 'line',
@@ -76,25 +135,22 @@
             labels: chartLabels,
             datasets: [{
                 label: 'Prompts',
-                data: {{ prompt_counts | tojson }},
-                borderColor: '#c85050',
-                backgroundColor: 'rgba(200, 80, 80, 0.1)',
+                data: JSON.parse('{{ prompt_counts | tojson | safe }}'),
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.15)',
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointBackgroundColor: '#3B82F6',
+                pointBorderColor: '#1E293B',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } },
-                x: { ticks: { color: textColor }, grid: { color: gridColor } }
-            },
-            plugins: { legend: { labels: { color: textColor } } }
-        }
+        options: commonOptions
     });
 
-    // New Users Chart
+    // New Users Chart - Teal/Accent Theme
     const newUsersCtx = document.getElementById('newUsersChart').getContext('2d');
     new Chart(newUsersCtx, {
         type: 'line',
@@ -102,25 +158,22 @@
             labels: chartLabels,
             datasets: [{
                 label: 'New Users',
-                data: {{ new_user_counts | tojson }},
-                borderColor: '#3aeb34',
-                backgroundColor: 'rgba(58, 235, 52, 0.1)',
+                data: JSON.parse('{{ new_user_counts | tojson | safe }}'),
+                borderColor: '#2DD4BF',
+                backgroundColor: 'rgba(45, 212, 191, 0.15)',
                 fill: true,
-                tension: 0.4
-            }]
+                tension: 0.4,
+                pointBackgroundColor: '#2DD4BF',
+                pointBorderColor: '#1E293B',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }] 
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } },
-                x: { ticks: { color: textColor }, grid: { color: gridColor } }
-            },
-            plugins: { legend: { labels: { color: textColor } } }
-        }
+        options: commonOptions
     });
 
-    // Active Users Chart
+    // Active Users Chart - Purple Theme
     const activeUsersCtx = document.getElementById('activeUsersChart').getContext('2d');
     new Chart(activeUsersCtx, {
         type: 'line',
@@ -128,22 +181,19 @@
             labels: chartLabels,
             datasets: [{
                 label: 'Active Users',
-                data: {{ active_user_counts | tojson }},
-                borderColor: '#36A2EB',
-                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                data: JSON.parse('{{ active_user_counts | tojson | safe }}'),
+                borderColor: '#A78BFA',
+                backgroundColor: 'rgba(167, 139, 250, 0.15)',
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointBackgroundColor: '#A78BFA',
+                pointBorderColor: '#1E293B',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } },
-                x: { ticks: { color: textColor }, grid: { color: gridColor } }
-            },
-            plugins: { legend: { labels: { color: textColor } } }
-        }
+        options: commonOptions
     });
 </script>
 {% endblock %}

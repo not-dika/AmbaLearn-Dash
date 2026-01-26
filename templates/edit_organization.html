@@ -1,20 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Organization{% endblock %}
+{% block title %}Edit Organization - AmbaLearn Dashboard{% endblock %}
 
 {% block content %}
-    <h1 class="h2 mb-4">Edit Organization</h1>
+    <div class="page-header">
+        <div class="d-flex align-items-center" style="gap: 16px;">
+            <a href="{{ url_for('organizations') }}" class="btn btn-secondary" style="padding: 10px 14px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h1>Edit Organization</h1>
+                <p>Update organization details</p>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
+            <div class="d-flex align-items-center" style="gap: 16px; margin-bottom: 24px;">
+                <div style="width: 64px; height: 64px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(45, 212, 191, 0.15) 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-building" style="color: var(--color-primary-light); font-size: 28px;"></i>
+                </div>
+                <div>
+                    <h5 style="margin: 0; color: var(--color-text-primary);">{{ org.name }}</h5>
+                    <span style="color: var(--color-text-secondary); font-size: 14px;">Organization ID: {{ org.id }}</span>
+                </div>
+            </div>
+
             <form method="post">
                 <div class="mb-3">
                     <label for="organization_name" class="form-label">Organization Name</label>
                     <input type="text" class="form-control" id="organization_name" name="organization_name" value="{{ org.name }}" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a href="{{ url_for('organizations') }}" class="btn btn-secondary">Cancel</a>
+                <div class="d-flex" style="gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> Save Changes
+                    </button>
+                    <a href="{{ url_for('organizations') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </a>
+                </div>
             </form>
         </div>
     </div>
 {% endblock %}
-

@@ -3,28 +3,62 @@
 {% block title %}AmbaLearn Dashboard - Models{% endblock %}
 
 {% block content %}
-    <h1 class="h2 mb-4">Manage Models</h1>
+    <div class="page-header">
+        <h1>Manage Models</h1>
+        <p>Configure AI model settings and API connections</p>
+    </div>
 
-    <div class="card">
-        <div class="card-body">
-            <form>
-                <div class="mb-3">
-                    <label for="model-select" class="form-label">Switch Models</label>
-                    <select class="form-select" id="model-select">
-                        <option value="local">Local (Ollama)</option>
-                        <option value="mistral">Mistral API</option>
-                    </select>
+    <div class="row" style="gap: 24px;">
+        <div style="flex: 1; min-width: 300px;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-gear-fill"></i> Model Configuration</h5>
+                    <form>
+                        <div class="mb-3">
+                            <label for="model-select" class="form-label">Model Provider</label>
+                            <select class="form-select" id="model-select">
+                                <option value="local">Local (Ollama)</option>
+                                <option value="mistral">Mistral API</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="model-name" class="form-label">Model Name</label>
+                            <input type="text" class="form-control" id="model-name" placeholder="e.g., mistral:7b" value="mistral:7b">
+                        </div>
+                        <div class="mb-3" id="api-key-field" style="display: none;">
+                            <label for="api-key" class="form-label">API Key</label>
+                            <input type="password" class="form-control" id="api-key" placeholder="Paste your API key" value="69646583-e124-8324-b851-cc03168081a8">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Settings
+                        </button>
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <label for="model-name" class="form-label">Model Name</label>
-                    <input type="text" class="form-control" id="model-name" placeholder="e.g., mistral:7b" value="mistral:7b">
+            </div>
+        </div>
+
+        <div style="flex: 1; min-width: 300px;">
+            <div class="model-card">
+                <div class="model-icon">
+                    <i class="bi bi-cpu-fill"></i>
                 </div>
-                <div class="mb-3" id="api-key-field" style="display: none;">
-                    <label for="api-key" class="form-label">API Key</label>
-                    <input type="password" class="form-control" id="api-key" placeholder="Paste your API key" value="69646583-e124-8324-b851-cc03168081a8">
+                <h5>Ollama Local</h5>
+                <p>Run AI models locally on your machine. No API costs, complete privacy, and faster response times for supported hardware.</p>
+                <span class="badge bg-success" style="margin-top: 12px;">
+                    <i class="bi bi-check-circle"></i> Recommended
+                </span>
+            </div>
+
+            <div class="model-card" style="margin-top: 24px;">
+                <div class="model-icon">
+                    <i class="bi bi-cloud-fill"></i>
                 </div>
-                <button type="submit" class="btn btn-primary">Save Settings</button>
-            </form>
+                <h5>Mistral API</h5>
+                <p>Use Mistral's cloud-based API for powerful AI capabilities without local hardware requirements.</p>
+                <span class="badge bg-secondary" style="margin-top: 12px;">
+                    <i class="bi bi-key"></i> Requires API Key
+                </span>
+            </div>
         </div>
     </div>
 {% endblock %}
@@ -51,4 +85,3 @@
     });
 </script>
 {% endblock %}
-

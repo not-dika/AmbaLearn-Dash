@@ -1,66 +1,134 @@
 {% extends "base.html" %}
 
-{% block title %}{% if course %}Edit Course{% else %}Add New Course{% endif %}{% endblock %}
+{% block title %}{% if course %}Edit Course{% else %}Add New Course{% endif %} - AmbaLearn Dashboard{% endblock %}
+
+{% block head %}
+<style>
+    .step-group {
+        background: var(--color-bg-primary);
+        border: 1px solid var(--color-divider) !important;
+        border-radius: var(--radius-md) !important;
+        padding: 20px !important;
+        margin-bottom: 16px !important;
+        transition: all var(--transition-fast);
+    }
+    
+    .step-group:hover {
+        border-color: var(--color-primary) !important;
+    }
+    
+    .step-group h6 {
+        color: var(--color-primary-light);
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .btn-close {
+        background: transparent;
+        border: none;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        font-size: 20px;
+        padding: 0;
+        line-height: 1;
+    }
+    
+    .btn-close:hover {
+        color: var(--color-error);
+    }
+    
+    hr {
+        border-color: var(--color-divider);
+        margin: 24px 0;
+    }
+    
+    textarea.form-control {
+        min-height: 80px;
+        resize: vertical;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2">{% if course %}Edit Course{% else %}Add New Course{% endif %}</h1>
+<div class="page-header">
+    <div class="d-flex align-items-center" style="gap: 16px;">
+        <a href="{{ url_for('courses') }}" class="btn btn-secondary" style="padding: 10px 14px;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>{% if course %}Edit Course{% else %}Add New Course{% endif %}</h1>
+            <p>{% if course %}Update course information and steps{% else %}Create a new learning course{% endif %}</p>
+        </div>
+    </div>
 </div>
 
 <div class="card">
     <div class="card-body">
         <form method="post">
-            <div class="mb-3">
-                <label for="course_title" class="form-label">Course Title</label>
-                <input type="text" class="form-control" id="course_title" name="course_title" value="{{ course.course_title if course else '' }}" required>
+            <h5 class="card-title" style="margin-bottom: 24px;"><i class="bi bi-info-circle-fill"></i> Course Information</h5>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="course_title" class="form-label">Course Title</label>
+                    <input type="text" class="form-control" id="course_title" name="course_title" value="{{ course.course_title if course else '' }}" placeholder="Enter course title" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="difficulty" class="form-label">Difficulty Level</label>
+                    <select class="form-select" id="difficulty" name="difficulty">
+                        <option value="Beginner" {% if course and course.difficulty == 'Beginner' %}selected{% endif %}>🟢 Beginner</option>
+                        <option value="Intermediate" {% if course and course.difficulty == 'Intermediate' %}selected{% endif %}>🟡 Intermediate</option>
+                        <option value="Advanced" {% if course and course.difficulty == 'Advanced' %}selected{% endif %}>🔴 Advanced</option>
+                    </select>
+                </div>
             </div>
+            
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" name="description" rows="3">{{ course.description if course else '' }}</textarea>
-            </div>
-            <div class="mb-3">
-                <label for="difficulty" class="form-label">Difficulty</label>
-                <select class="form-select" id="difficulty" name="difficulty">
-                    <option {% if course and course.difficulty == 'Beginner' %}selected{% endif %}>Beginner</option>
-                    <option {% if course and course.difficulty == 'Intermediate' %}selected{% endif %}>Intermediate</option>
-                    <option {% if course and course.difficulty == 'Advanced' %}selected{% endif %}>Advanced</option>
-                </select>
+                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Describe what this course covers...">{{ course.description if course else '' }}</textarea>
             </div>
 
             <hr>
 
-            <h5 class="mt-4">Steps</h5>
+            <h5 class="card-title" style="margin-bottom: 20px;"><i class="bi bi-list-ol"></i> Course Steps</h5>
             <div id="steps-container">
                 {% if course %}
                     {% for step in course.steps %}
-                    <div class="step-group border rounded p-3 mb-3">
-                        <div class="d-flex justify-content-between">
-                            <h6>Step {{ loop.index }}</h6>
-                            <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.step-group').remove()"></button>
+                    <div class="step-group">
+                        <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 16px;">
+                            <h6><i class="bi bi-bookmark-fill"></i> Step {{ loop.index }}</h6>
+                            <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.step-group').remove()">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Step Title</label>
-                            <input type="text" class="form-control" name="step_title_{{ loop.index0 }}" value="{{ step.title }}">
+                            <input type="text" class="form-control" name="step_title_{{ loop.index0 }}" value="{{ step.title }}" placeholder="Enter step title">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Objective</label>
-                            <textarea class="form-control" name="step_objective_{{ loop.index0 }}" rows="2">{{ step.objective }}</textarea>
+                            <textarea class="form-control" name="step_objective_{{ loop.index0 }}" rows="2" placeholder="What will the learner achieve?">{{ step.objective }}</textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Content Outline (comma-separated)</label>
-                            <input type="text" class="form-control" name="step_content_{{ loop.index0 }}" value="{{ step.content_outline | join(', ') }}">
+                            <input type="text" class="form-control" name="step_content_{{ loop.index0 }}" value="{{ step.content_outline | join(', ') }}" placeholder="Topic 1, Topic 2, Topic 3">
                         </div>
                     </div>
                     {% endfor %}
                 {% endif %}
             </div>
-            <button type="button" id="add-step-btn" class="btn btn-outline-secondary mt-2">Add Step</button>
+            <button type="button" id="add-step-btn" class="btn btn-secondary" style="margin-top: 16px;">
+                <i class="bi bi-plus-lg"></i> Add Step
+            </button>
 
             <hr>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">Save Course</button>
-                <a href="{{ url_for('courses') }}" class="btn btn-secondary">Cancel</a>
+            <div class="d-flex" style="gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Save Course
+                </button>
+                <a href="{{ url_for('courses') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-lg"></i> Cancel
+                </a>
             </div>
         </form>
     </div>
@@ -72,28 +140,30 @@
 document.addEventListener('DOMContentLoaded', function() {
     const addStepBtn = document.getElementById('add-step-btn');
     const stepsContainer = document.getElementById('steps-container');
-    let stepIndex = {{ course.steps | length if course else 0 }};
+    let stepIndex = Number("{{ course.steps | length if course else 0 }}");
 
     addStepBtn.addEventListener('click', function() {
         stepIndex++;
         const newStep = document.createElement('div');
-        newStep.classList.add('step-group', 'border', 'rounded', 'p-3', 'mb-3');
+        newStep.classList.add('step-group');
         newStep.innerHTML = `
-            <div class="d-flex justify-content-between">
-                <h6>Step ${stepIndex}</h6>
-                <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.step-group').remove()"></button>
+            <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 16px;">
+                <h6><i class="bi bi-bookmark-fill"></i> Step ${stepIndex}</h6>
+                <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.step-group').remove()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
             <div class="mb-3">
                 <label class="form-label">Step Title</label>
-                <input type="text" class="form-control" name="step_title_${stepIndex -1}" value="">
+                <input type="text" class="form-control" name="step_title_${stepIndex - 1}" placeholder="Enter step title">
             </div>
             <div class="mb-3">
                 <label class="form-label">Objective</label>
-                <textarea class="form-control" name="step_objective_${stepIndex - 1}" rows="2"></textarea>
+                <textarea class="form-control" name="step_objective_${stepIndex - 1}" rows="2" placeholder="What will the learner achieve?"></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Content Outline (comma-separated)</label>
-                <input type="text" class="form-control" name="step_content_${stepIndex - 1}" value="">
+                <input type="text" class="form-control" name="step_content_${stepIndex - 1}" placeholder="Topic 1, Topic 2, Topic 3">
             </div>
         `;
         stepsContainer.appendChild(newStep);
