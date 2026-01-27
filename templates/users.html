@@ -3,84 +3,85 @@
 {% block title %}AmbaLearn Dashboard - Users{% endblock %}
 
 {% block content %}
-    <div class="page-header">
-        <h1>Users</h1>
-        <p>Manage all registered users on the platform</p>
-    </div>
+<div class="page-header">
+    <h1>Users</h1>
+    <p>Manage all registered users on the platform</p>
+</div>
 
-    <!-- Add User Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-person-plus-fill"></i> Add New User</h5>
-            <form action="/add_user" method="post">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" placeholder="Enter username" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Organization</label>
-                        <select class="form-select" name="organization_id">
-                            <option value="">No Organization</option>
-                            {% for org in organizations %}
-                            <option value="{{ org.id }}">{{ org.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+<!-- Add User Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-person-plus-fill"></i> Add New User</h5>
+        <form action="/add_user" method="post">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control" name="username" placeholder="Enter username" required>
                 </div>
-                <button class="btn btn-primary" type="submit">
-                    <i class="bi bi-plus-lg"></i> Add User
-                </button>
-            </form>
-        </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Organization</label>
+                    <select class="form-select" name="organization_id">
+                        <option value="">No Organization</option>
+                        {% for org in organizations %}
+                        <option value="{{ org.id }}">{{ org.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-plus-lg"></i> Add User
+            </button>
+        </form>
     </div>
+</div>
 
-    <!-- Users Table -->
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title"><i class="bi bi-people-fill"></i> All Users</h5>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Username</th>
-                        <th scope="col">Organization</th>
-                        <th scope="col">Created At</th>
-                        <th scope="col">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <th scope="row">{{ user.id }}</th>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 36px; height: 36px; background: var(--gradient-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
-                                    {{ user.username[0].upper() }}
-                                </div>
-                                <span>{{ user.username }}</span>
+<!-- Users Table -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-people-fill"></i> All Users</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Username</th>
+                    <th scope="col">Organization</th>
+                    <th scope="col">Created At</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <th scope="row">{{ user.id }}</th>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div
+                                style="width: 36px; height: 36px; background: var(--gradient-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                                {{ user.username[0].upper() }}
                             </div>
-                        </td>
-                        <td>
-                            {% if user.organization %}
-                            <span class="badge bg-primary">{{ user.organization.name }}</span>
-                            {% else %}
-                            <span class="badge bg-secondary">No Organization</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
-                        <td>
-                            <a href="/edit_user/{{ user.id }}" class="btn btn-sm btn-outline-warning">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <a href="/delete_user/{{ user.id }}" class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i> Delete
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                            <span>{{ user.username }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if user.organization %}
+                        <span class="badge bg-primary">{{ user.organization.name }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary">No Organization</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.registered_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <a href="/edit_user/{{ user.id }}" class="btn btn-sm btn-outline-warning">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="/delete_user/{{ user.id }}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
 {% endblock %}

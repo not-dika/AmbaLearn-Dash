@@ -5,3 +5,5 @@ pymysql
 flask-login
 flask-bcrypt
 python-dotenv
+requests
+textblob

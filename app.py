@@ -5,8 +5,9 @@ from flask_bcrypt import Bcrypt
 from sqlalchemy import func, desc
 from datetime import datetime, timedelta
 import os
-import json
+import requests
 from models import db, User, Organization, ActiveUser, Feedback, PromptStat, ExamScore, CourseMetadata
+from sentiment import analyzer
 
 app = Flask(__name__)
 # Secure secret key
@@ -266,19 +267,34 @@ def delete_user(user_id):
 @app.route('/feedback')
 @login_required
 def feedback():
-    """Renders real feedback from the database."""
-    all_feedback = Feedback.query.order_by(desc(Feedback.created_at)).all()
-    # Normalize data for template
-    feedback_data = []
-    for f in all_feedback:
-        feedback_data.append({
-            'user': f.user.username if f.user else 'Unknown',
-            'comment': f.comment,
-            'course_name': f.course_name,
-            'sentiment': f.sentiment,
-            'created_at': f.created_at
-        })
-    return render_template('feedback.html', feedback_data=feedback_data, user=current_user)
+    if current_user.role != 'admin':
+        return "Access Forbidden: Admins Only", 403
+
+    feedback_data = Feedback.query.order_by(desc(Feedback.created_at)).all()
+    return render_template('feedback.html', feedback_data=feedback_data)
+
+@app.route('/analyze_feedback', methods=['POST'])
+@login_required
+def analyze_feedback():
+    if current_user.role != 'admin':
+        return "Access Forbidden", 403
+
+    feedbacks = Feedback.query.filter_by(sentiment='unknown').all()
+    count = 0
+    for fb in feedbacks:
+        # Re-analyze
+        new_sentiment = analyzer.analyze(fb.comment)
+        if fb.sentiment != new_sentiment:
+            fb.sentiment = new_sentiment
+            count += 1
+    
+    if count > 0:
+        db.session.commit()
+        flash(f"Analyzed and updated {count} feedback entries.", "success")
+    else:
+        flash("Sentiment analysis up to date.", "info")
+
+    return redirect(url_for('feedback'))
 
 if __name__ == '__main__':
     # No more drop_all() !

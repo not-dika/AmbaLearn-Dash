@@ -1,106 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AmbaLearn Logic Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='main_app_style.css') }}">
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f8fafc;
-        }
-        .login-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .login-header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #64748b;
-            font-size: 0.875rem;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-        .btn-login {
-            width: 100%;
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.15s;
-        }
-        .btn-login:hover {
-            background-color: #2563eb;
-        }
-        .alert {
-            padding: 0.75rem;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-            font-size: 0.875rem;
-        }
-        .alert-error {
-            background-color: #fef2f2;
-            color: #ef4444;
-            border: 1px solid #fee2e2;
-        }
-    </style>
+    <title>Login - AmbaLearn Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login_style.css') }}">
 </head>
-<body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>Admin Login</h1>
-            <p>AmbaLearn Dashboard</p>
-        </div>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
 
-        <form method="POST" action="{{ url_for('login') }}">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required autofocus>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <div class="logo">
+                <span class="material-icons icon">admin_panel_settings</span>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+
+            <h2>Admin Login</h2>
+            <div class="subtitle">AmbaLearn Dashboard</div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-message {{ category }}">
+                <span class="material-icons" style="font-size: 20px;">
+                    {{ 'check_circle' if category == 'success' else 'error_outline' }}
+                </span>
+                {{ message }}
             </div>
-            <button type="submit" class="btn-login">Sign In</button>
-        </form>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST">
+                <div class="form-group">
+                    <span class="material-icons icon">email</span>
+                    <input type="email" name="email" placeholder="Email" required autofocus>
+                </div>
+                <div class="form-group">
+                    <span class="material-icons icon">lock</span>
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn">Sign In</button>
+            </form>
+
+            <div style="margin-top: 24px; text-align: center; font-size: 13px; color: var(--color-text-secondary);">
+                <span class="material-icons"
+                    style="font-size: 14px; vertical-align: middle; margin-right: 4px;">lock</span>
+                Secure Admin Access
+            </div>
+        </div>
     </div>
 </body>
+
 </html>

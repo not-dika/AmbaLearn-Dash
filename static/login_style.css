@@ -1,0 +1,192 @@
+/* === AmbaLearn Web - Login Theme === */
+
+:root {
+  /* Light Theme (Default) */
+  --color-bg-primary: #F8F9FA;
+  --color-bg-secondary: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-primary: #1E40AF;
+  --color-primary-dark: #1E3A8A;
+  --color-primary-light: #3B82F6;
+  --color-accent: #0D9488;
+  --color-accent-light: #2DD4BF;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-divider: #E5E7EB;
+  --color-error: #DC2626;
+  --color-success: #16A34A;
+  
+  /* Shadows */
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  --gradient-surface: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-surface) 100%);
+  
+  /* Border Radius */
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* --- Auth Pages (Login/Register) --- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  background: var(--gradient-surface);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, var(--color-primary) 0%, transparent 70%);
+  opacity: 0.05;
+  animation: pulse 15s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.05; }
+  50% { transform: scale(1.1); opacity: 0.08; }
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  margin: 24px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-divider);
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+}
+
+.auth-box h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+  text-align: center;
+  margin-top: 0;
+}
+
+.auth-box .subtitle {
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-bottom: 32px;
+  font-size: 14px;
+}
+
+.auth-box .logo {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
+}
+
+.auth-box .logo .icon {
+  font-size: 32px;
+  color: white;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 15px;
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+}
+
+.form-group .icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(30, 64, 175, 0.3);
+  margin-top: 8px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
+}
+
+.flash-message {
+    padding: 12px;
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flash-message.error {
+    background-color: rgba(220, 38, 38, 0.1); 
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    color: var(--color-error);
+}
+
+.flash-message.success {
+    background-color: rgba(22, 163, 74, 0.1);
+    border-color: rgba(22, 163, 74, 0.2);
+    color: var(--color-success);
+}

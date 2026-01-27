@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,83 +9,107 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block head %}{% endblock %}
 </head>
+
 <body>
 
-<nav class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-icon">
-            <i class="bi bi-mortarboard-fill"></i>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div>
+                <h4>AmbaLearn</h4>
+                <span class="subtitle">Admin Dashboard</span>
+            </div>
         </div>
-        <div>
-            <h4>AmbaLearn</h4>
-            <span class="subtitle">Admin Dashboard</span>
+
+        <div class="sidebar-sticky">
+            <div class="section-title">Main Menu</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'overview' %}active{% endif %}" href="/">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-grid-fill"></i>
+                        </div>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'models' %}active{% endif %}" href="/models">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-cpu-fill"></i>
+                        </div>
+                        <span>Models</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint in ['courses', 'edit_course'] %}active{% endif %}"
+                        href="/courses">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                        <span>Courses</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="section-title">Management</div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint in ['organizations', 'edit_organization'] %}active{% endif %}"
+                        href="/organizations">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <span>Organizations</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint in ['users', 'edit_user'] %}active{% endif %}"
+                        href="/users">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <span>All Users</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'feedback' %}active{% endif %}" href="/feedback">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-chat-left-text-fill"></i>
+                        </div>
+                        <span>Feedback</span>
+                    </a>
+                </li>
+            </ul>
         </div>
-    </div>
-    
-    <div class="sidebar-sticky">
-        <div class="section-title">Main Menu</div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'overview' %}active{% endif %}" href="/">
-                    <div class="icon-wrapper">
-                        <i class="bi bi-grid-fill"></i>
-                    </div>
-                    <span>Overview</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'models' %}active{% endif %}" href="/models">
-                    <div class="icon-wrapper">
-                        <i class="bi bi-cpu-fill"></i>
-                    </div>
-                    <span>Models</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint in ['courses', 'edit_course'] %}active{% endif %}" href="/courses">
-                    <div class="icon-wrapper">
-                        <i class="bi bi-journal-bookmark-fill"></i>
-                    </div>
-                    <span>Courses</span>
-                </a>
-            </li>
-        </ul>
-        
-        <div class="section-title">Management</div>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint in ['organizations', 'edit_organization'] %}active{% endif %}" href="/organizations">
-                    <div class="icon-wrapper">
-                        <i class="bi bi-building"></i>
-                    </div>
-                    <span>Organizations</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint in ['users', 'edit_user'] %}active{% endif %}" href="/users">
-                    <div class="icon-wrapper">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                    <span>All Users</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'feedback' %}active{% endif %}" href="/feedback">
-                    <div class="icon-wrapper">
-                        <i class="bi bi-chat-left-text-fill"></i>
-                    </div>
-                    <span>Feedback</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-</nav>
+        <div class="sidebar-footer" style="padding: 20px;">
+            <a href="/logout" class="nav-link"
+                style="color: var(--color-error); justify-content: center; background: rgba(220, 38, 38, 0.1); border-radius: 8px;">
+                <i class="bi bi-box-arrow-right" style="margin-right: 8px;"></i> Logout
+            </a>
+        </div>
+    </nav>
 
-<main class="main-content">
-    {% block content %}{% endblock %}
-</main>
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert"
+            style="margin: 20px 20px 0 20px; border-radius: 8px; border: 1px solid transparent; padding: 1rem 1rem;">
+            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+                onclick="this.parentElement.style.display='none';"
+                style="float: right; border: none; background: none; font-size: 1.2rem; cursor: pointer;">&times;</button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% block scripts %}{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block scripts %}{% endblock %}
 </body>
+
 </html>
