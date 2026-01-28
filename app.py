@@ -197,14 +197,39 @@ def generate_course_action():
 @app.route('/courses')
 @login_required
 def courses():
-    # If manager, show only their org's courses (mock logic for now as courses are json based)
-    # In a real scenario we would filter courses by org_id
+    # If manager, show only their org's courses
     if current_user.role == 'manager' and not current_user.organization_id:
          flash('You are not assigned to an organization.', 'warning')
+         return render_template('courses.html', courses=[], user=current_user)
     
-    # To properly implement this, we'd need to scan the JSON files from the Engine's directory
-    # For now, we render empty or placeholder
-    return render_template('courses.html', courses=[], user=current_user)
+    # If admin viewing courses, they probably need to select an org first or view all? 
+    # For simplicity, if Admin has an org_id set (mimicking manager view), show that.
+    # Otherwise, show empty or all (requires new Engine endpoint). 
+    # Let's assume Admin acts as Manager of their selected org context.
+    
+    org_id = current_user.organization_id
+    if not org_id:
+         # TODO: Admin view all courses across all orgs?
+         return render_template('courses.html', courses=[], user=current_user)
+
+    courses_list = []
+    
+    # Fetch from Engine
+    try:
+        cookies = session.get('engine_cookies')
+        if cookies:
+            resp = requests.get(
+                f"{API_BASE_URL}/organization/{org_id}/courses",
+                cookies=cookies
+            )
+            if resp.status_code == 200:
+                courses_list = resp.json()
+            else:
+                print(f"Failed to fetch courses: {resp.status_code} - {resp.text}")
+    except Exception as e:
+        print(f"Error fetching courses: {e}")
+
+    return render_template('courses.html', courses=courses_list, user=current_user)
 
 @app.route('/my_organization')
 @login_required
@@ -233,11 +258,117 @@ def organization_members():
     return render_template('organization_members.html', org=org, members=org.users, user=current_user)
 
 
-@app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
+@app.route('/edit_course/<string:course_uid>', methods=['GET', 'POST'])
 @login_required
-def edit_course(course_id):
-    # Setup for future JSON editing
-    return render_template('edit_course.html', course=None, course_id=course_id, user=current_user)
+def edit_course(course_uid):
+    org_id = current_user.organization_id
+    if not org_id:
+        flash("Organization context missing", "error")
+        return redirect(url_for('courses'))
+    
+    cookies = session.get('engine_cookies')
+    if not cookies:
+        flash("Please login again to sync with Engine.", "error")
+        return redirect(url_for('login'))
+
+    # CHECK IF NEW COURSE (We use 'new' or '0' as identifier for creation)
+    is_new = (course_uid == '0' or course_uid == 'new')
+    
+    if request.method == 'POST':
+        # Construct JSON from form
+        # Form data: course_title, difficulty, description
+        # Steps data: step_title_0, step_objective_0, step_content_0 ...
+        
+        course_data = {
+            "course_title": request.form.get("course_title"),
+            "difficulty": request.form.get("difficulty"),
+            "description": request.form.get("description"),
+            "steps": []
+        }
+        
+        # Parse steps
+        # We need to iterate until we find no more steps
+        idx = 0
+        while True:
+            if f"step_title_{idx}" not in request.form and f"step_objective_{idx}" not in request.form:
+                # Try checking if we skipped one? No, assuming sequential from JS for now or just collecting all keys
+                # Better approach: Iterate keys or use a reasonably high max
+                # Given the JS implementation in template, indices might be sparse if deleted.
+                # Let's iterate keys to be safe?
+                # Actually, simply checking up to 50 is safe enough for a prototype.
+                if idx > 50: break 
+                
+            title = request.form.get(f"step_title_{idx}")
+            if title: # Only add if title exists (simple validation)
+                 obj = request.form.get(f"step_objective_{idx}")
+                 content_raw = request.form.get(f"step_content_{idx}", "")
+                 content_list = [c.strip() for c in content_raw.split(',') if c.strip()]
+                 
+                 course_data["steps"].append({
+                     "step_number": len(course_data["steps"]) + 1,
+                     "title": title,
+                     "objective": obj,
+                     "content_outline": content_list
+                 })
+            
+            # If we missed a key but there are more (sparse array due to deletion), we continue?
+            # The JS `stepIndex` increments. If I delete step 1, I have step 0 and 2.
+            # So we should check if we ran out of KEYS in the form that start with step_title_
+            # Optimization: check up to max index found in keys.
+            idx += 1
+            if idx > 100: break # Safety break
+
+        try:
+            if is_new:
+                resp = requests.post(f"{API_BASE_URL}/organization/{org_id}/add_course", json=course_data, cookies=cookies)
+            else:
+                resp = requests.post(f"{API_BASE_URL}/organization/{org_id}/edit_course/{course_uid}", json=course_data, cookies=cookies)
+            
+            if resp.status_code in [200, 201]:
+                flash("Course saved successfully.", "success")
+                return redirect(url_for('courses'))
+            else:
+                flash(f"Error saving course: {resp.text}", "error")
+
+        except Exception as e:
+            flash(f"Connection error: {e}", "error")
+            
+    # GET REQUEST
+    course = None
+    if not is_new:
+        try:
+            resp = requests.get(f"{API_BASE_URL}/organization/{org_id}/course/{course_uid}", cookies=cookies)
+            if resp.status_code == 200:
+                course = resp.json()
+            else:
+                flash("Course not found or error loading.", "error")
+                return redirect(url_for('courses'))
+        except Exception as e:
+            flash(f"Connection error loading course: {e}", "error")
+            return redirect(url_for('courses'))
+
+    return render_template('edit_course.html', course=course, course_id=course_uid, user=current_user)
+
+@app.route('/delete_course/<string:course_uid>')
+@login_required
+def delete_course(course_uid):
+    org_id = current_user.organization_id
+    if not org_id:
+         flash("Organization context missing", "error")
+         return redirect(url_for('courses'))
+
+    cookies = session.get('engine_cookies')
+    try:
+        resp = requests.delete(f"{API_BASE_URL}/organization/{org_id}/course/{course_uid}", cookies=cookies)
+        
+        if resp.status_code == 200:
+            flash("Course deleted successfully", "success")
+        else:
+            flash(f"Failed to delete course: {resp.text}", "error")
+    except Exception as e:
+        flash(f"Connection error: {e}", "error")
+        
+    return redirect(url_for('courses'))
 
 # --- Organization Routes ---
 @app.route('/organizations')
